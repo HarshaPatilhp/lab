@@ -1,4 +1,4 @@
-=================================================================================================================
+===============================
 1. Part A
 
 use ProgrammingBooks
@@ -9,9 +9,9 @@ _id: 1,
 title: "Clean Code",
 author: "Robert C. Martin",
 category: "Software Development",
+
 year: 2008
 })
-
 db.BookDetails.insertMany([
 {_id: 2, title: "JavaScript: The Good Parts", author: "Douglas Crockford",
 category: "JavaScript", year: 2008 },
@@ -37,4 +37,529 @@ $or: [
 ]
 }).pretty()
 
-1 Part B
+=============================================
+1.Part B
+
+db.BookDetails.find({ year: { $gt: 2000 } }).pretty( )
+db.BookDetails.find({ year: { $gte: 2000 } }).pretty( )
+db.BookDetails.find({ year: { $lt: 2000 } }).pretty( )
+db.BookDetails.find({ year: { $lte: 2000 } }).pretty( )
+db.BookDetails.find({ year: { $ne: 2000 } }).pretty( )
+db.BookDetails.find({category:{$in:['javascript','Software Development']}}).pretty( )
+db.BookDetails.find({category:{$nin:['javascript','Software Development']}}).pretty( )
+
+updating
+db.BookDetails.updateOne(
+{ title: "Clean Code: A Handbook of Agile Software Craftsmanship" },
+{ $set: { author: "vtucode" } }
+)
+
+db.BookDetails.updateMany(
+{ year: { $lt: 2010 } },
+{ $set: { category: "vtucode website" } }
+)
+
+db.BookDetails.updateMany({category:{$exists:true}},{$set:{pubisher:"McGrawHill"}})
+
+db.BookDetails.findOneAndUpdate({category:"Python"},
+{$set:{title:"Python:Complete refrence"}},{returnDocumnet:"after"})
+
+db.BookDetails.findAndModify({query:{category:'Python'},
+update:{$set:{title:"Python:For Begginers",year:2015}}})
+
+delete
+db.BookDetails.deleteOne({ _id: 2 })
+db.BookDetails.deleteMany({ year: { $lt: 1995 } })
+db.BookDetails.deleteMany({ })
+
+projection:
+db.BookDetails.find({ },{category:1,title:1,price:1})
+db.BookDetails.find({},{category:1,title:1,price:1,_id:0})
+db.BookDetails.find({title:'Clean Code'},{category:1,title:1,price:1,_id:0})
+
+==============================================================================================
+
+2.part a
+
+db.BookDetails.find({title:'Clean Code'},{category:1,title:1,price:1,_id:0})
+db.BookDetails.find({title:'Clean Code'},{category:0,_id:0})
+
+=============================================
+2.part b
+
+db.BookDetails.countDocuments( ) 
+db.BookDetails.find().limit(5) 
+db.BookDetails.find({},{category:1,title:1,price:1,_id:0}).limit(5)
+db.BookDetails.find().skip(2).sort('category')
+
+==========================================================================================
+3.part a
+
+use companyDB
+db.Employees.insertMany([
+{ name: "Alice", age: 30, department: "HR", salary: 50000,
+joinDate: new Date("2015-01-15") },
+{ name: "Bob", age: 24, department: "Engineering", salary: 70000,
+joinDate: new Date("2019-03-10") },
+{ name: "Charlie", age: 29, department: "Engineering", salary: 75000,
+joinDate: new Date("2017-06-23") },
+{ name: "David", age: 35, department: "Marketing", salary: 60000,
+joinDate: new Date("2014-11-01") },
+{ name: "Eve", age: 28, department: "Finance", salary: 80000,
+joinDate: new Date("2018-08-19") }
+])
+
+db.Employees.find({ department: { $eq: "Engineering" } }).pretty( )
+db.Employees.find({ department: { $ne: "HR" } }).pretty( )
+db.Employees.find({ age: { $gt: 30 } }).pretty()
+db.Employees.find({ salary: { $lt: 70000 } }).pretty()
+db.Employees.find({ joinDate: { $gte: new Date("2018-01-01") } }).pretty()
+db.Employees.find({ age: { $lte: 28 } }).pretty()
+
+logical selectors:
+
+db.Employees.find({ $and: [ { department: "Engineering" }, { salary: { $gt: 70000 } } ]}).pretty( )
+db.Employees.find({ $or: [ { department: "HR" }, { salary: { $lt: 60000 } } ] }).pretty()
+db.Employees.find({ department: { $not: { $eq: "Engineering" } } }).pretty( )
+db.Employees.find({ $nor: [ { department: "HR" }, { salary: { $gt: 75000 } } ] }).pretty()
+
+geospatial selectors:
+
+use geodatabase
+
+db.Places.insertMany([
+{ name: "Central Park", location: { type: "Point", coordinates: [-73.9654, 40.7829] } },
+{ name: "Times Square", location: { type: "Point", coordinates: [-73.9851, 40.7580] } },
+{ name: "Brooklyn Bridge", location: { type: "Point", coordinates: [-73.9969, 40.7061] } },
+{ name: "Empire State Building", location: { type: "Point", coordinates: [-73.9857, 40.7488] } },
+{ name: "Statue of Liberty", location: { type: "Point", coordinates: [-74.0445, 40.6892] } }
+])
+
+db.Places.createIndex({ location: "2dsphere" })
+
+db.Places.find({
+location: {
+$near: {
+$geometry: {
+type: "Point",
+coordinates: [-73.9851, 40.7580]
+},
+$maxDistance: 5000 // distance in meters
+}
+}
+}).pretty( )
+
+db.Places.find({
+location: {
+$geoWithin: {
+$geometry: {
+type: "Polygon",
+coordinates: [
+[
+[-70.016, 35.715],
+[-74.014, 40.717],
+[-73.990, 40.730],
+[-73.990, 40.715],
+[-70.016, 35.715]
+]
+]
+}
+}
+}
+}).pretty()
+
+bitwise selectors:
+
+use empDB
+
+db.employees.insertMany([
+{ name: "Alice", flags: 1 }, // Active
+{ name: "Bob", flags: 3 }, // Active + Manager
+{ name: "Charlie", flags: 5 }, // Active + Remote Access
+{ name: "David", flags: 10 }, // Manager + Probation
+{ name: "Eve", flags: 15 } // All flags set
+])
+
+db.employees.find({ flags: { $bitsAllSet: 1 } })
+db.employees.find({ flags: { $bitsAnySet: [1, 2] } })
+db.employees.find({ flags: { $bitsAllClear: 8 } })
+db.employees.find({ flags: { $bitsAllSet: [0, 1] } })
+db.employees.find({ flags: { $bitsAnyClear: [0, 1, 2, 3] } })
+
+======================================================================================================
+
+4.part a
+
+use retailDB
+db.creteCollection(‘Products’)
+
+db.Products.insertMany([
+{
+name: "Laptop",
+brand: "BrandA",
+features: [
+{ name: "Processor", value: "Intel i7" },
+{ name: "RAM", value: "16GB" },
+{ name: "Storage", value: "512GB SSD" }
+],
+reviews: [
+{ user: "Alice", rating: 5, comment: "Excellent!" },
+{ user: "Bob", rating: 4, comment: "Very good" },
+{ user: "Charlie", rating: 3, comment: "Average" }
+]
+},
+{
+name: "Smartphone",
+brand: "BrandB",
+features: [
+{ name: "Processor", value: "Snapdragon 888" },
+{ name: "RAM", value: "8GB" },
+{ name: "Storage", value: "256GB" }
+],
+reviews: [
+{ user: "Dave", rating: 4, comment: "Good phone" },
+{ user: "Eve", rating: 2, comment: "Not satisfied" }
+]
+}
+])
+
+db.Products.find(
+{ name: "Laptop", "reviews.user": "Alice" },
+{ "reviews.$": 1 }
+).pretty( )
+
+db.Products.find(
+{ name: "Laptop" },
+{ reviews: { $elemMatch: { rating: { $gt: 4 } } } }
+).pretty( )
+
+db.Products.find(
+{ name: "Smartphone" },
+{ reviews: { $slice: 1 } }
+).pretty( )
+
+====================================================================================================
+
+5.part a
+
+use salesDB
+db.createCollection(‘Sales’)
+
+db.Sales.insertMany([
+{ date: new Date("2024-01-01"), product: "Laptop", price: 1200, quantity: 1, customer: "Amar" },
+{ date: new Date("2024-01-02"), product: "Laptop", price: 1200, quantity: 2, customer: "Babu" },
+{ date: new Date("2024-01-03"), product: "Mouse", price: 25, quantity: 5, customer: "Chandra" },
+{ date: new Date("2024-01-04"), product: "Keyboard", price: 45, quantity: 3, customer: "Amar" },
+{ date: new Date("2024-01-05"), product: "Monitor", price: 300, quantity: 1, customer: "Babu" },
+{ date: new Date("2024-01-06"), product: "Laptop", price: 1200, quantity: 1, customer: "Deva" }
+])
+
+db.Sales.aggregate([ { $group: { _id: "$product",
+averagePrice: { $avg: "$price" } } } ]).pretty( )
+
+db.Sales.aggregate([ { $group: { _id: "$product",
+minPrice: { $min: "$price" } } } ]).pretty()
+
+db.Sales.aggregate([ { $group: { _id: "$product",
+maxPrice: { $max: "$price" } } } ]).pretty()
+
+db.Sales.aggregate([ { $group: { _id: "$customer",
+products: { $push: "$product" } } } ]).pretty()
+
+db.Sales.aggregate([ { $group: { _id: "$customer",
+uniqueProducts: { $addToSet: "$product" } } } ]).pretty()
+
+=====================================================================================================
+
+6.part a
+
+use restaurantDB
+db.createCollection(‘restaurants’)
+
+db.restaurants.insertMany([
+{
+name: "Biryani House",
+cuisine: "Indian",
+location: "Jayanagar",
+reviews: [
+{ user: "Aarav", rating: 5, comment: "Amazing biryani!" },
+{ user: "Bhavana", rating: 4, comment: "Great place!" }
+]
+},
+{
+name: "Burger Joint",
+cuisine: "American",
+location: "Koramangala",
+reviews: [
+{ user: "Chirag", rating: 3, comment: "Average burger" },
+{ user: "Devika", rating: 4, comment: "Good value" }
+]
+},
+{
+name: "Pasta House",
+cuisine: "Italian",
+location: "Rajajinagar",
+reviews: [
+{ user: "Esha", rating: 5, comment: "Delicious pasta!" },
+{ user: "Farhan", rating: 4, comment: "Nice ambiance" }
+]
+},
+{
+name: "Curry Palace",
+cuisine: "Indian",
+location: "Jayanagar",
+reviews: [
+{ user: "Gaurav", rating: 4, comment: "Spicy and tasty!" },
+{ user: "Harini", rating: 5, comment: "Best curry in town!" }
+]
+},
+{
+name: "Taco Stand",
+cuisine: "Mexican",
+location: "Jayanagar",
+reviews: [
+{ user: "Ishaan", rating: 5, comment: "Fantastic tacos!" },
+{ user: "Jaya", rating: 4, comment: "Very authentic" }
+]
+}
+])
+
+db.restaurants.aggregate([
+{
+$match: {
+"location": "Jayanagar"
+}
+},
+{
+$unwind: "$reviews"
+},
+{
+$group: {
+_id: "$name",
+averageRating: { $avg: "$reviews.rating" },
+totalReviews: { $sum: 1 }
+}
+},
+{
+$sort: {
+averageRating: -1
+}
+},
+{
+$project: {
+_id: 0,
+restaurant: "$_id",
+averageRating: 1,
+totalReviews: 1
+}
+},
+{
+$skip: 1
+}
+]).pretty( )
+
+====================================================================================================
+
+7.part a
+
+use vacationRentals
+db.createCollection(‘listingsAndReviews’)
+
+db.listingsAndReviews.insertMany([
+{
+listing_url: "http://www.example.com/listing/123456",
+name: "Beautiful Apartment",
+address: {
+street: "123 Main Street",
+suburb: "Central",
+city: "Metropolis",
+country: "Wonderland"
+},
+host: {
+name: "Alice",
+picture_url: "http://www.example.com/images/host/host123.jpg"
+}
+},
+{
+listing_url: "http://www.example.com/listing/654321",
+name: "Cozy Cottage",
+address: {
+street: "456 Another St",
+suburb: "North",
+city: "Smallville",
+country: "Wonderland"
+},
+host: {
+name: "Bob",
+picture_url: ""
+}
+},
+{
+listing_url: "http://www.example.com/listing/789012",
+name: "Modern Condo",
+address: {
+street: "789 Side Road",
+suburb: "East",
+city: "Gotham",
+country: "Wonderland"
+},
+host: {
+name: "Charlie",
+picture_url: "http://www.example.com/images/host/host789.jpg"
+}
+}
+])
+
+db.listingsAndReviews.find(
+{
+"host.picture_url": { $exists: true, $ne: "" }
+},
+{
+listing_url: 1,
+name: 1,
+address: 1,
+"host.picture_url": 1
+}
+).pretty()
+
+=================================================================
+
+7.part b
+
+use ecommerce
+db.createCollection(‘products’)
+
+db.products.insertMany([
+{
+product_id: 1,
+name: "Laptop",
+category: "Electronics",
+price: 1200,
+reviews: [
+{ user: "Alice", rating: 5, comment: "Excellent!" },
+{ user: "Bob", rating: 4, comment: "Very good" },
+{ user: "Charlie", rating: 3, comment: "Average" }
+]
+},
+{
+product_id: 2,
+name: "Smartphone",
+category: "Electronics",
+price: 800,
+reviews: [
+{ user: "Dave", rating: 4, comment: "Good phone" },
+{ user: "Eve", rating: 2, comment: "Not satisfied" },
+{ user: "Frank", rating: 5, comment: "Amazing!" }
+]
+},
+{
+product_id: 3,
+name: "Headphones",
+category: "Accessories",
+price: 150,
+reviews: [
+{ user: "Grace", rating: 5, comment: "Great sound" },
+{ user: "Heidi", rating: 3, comment: "Okay" }
+]
+}
+])
+
+db.products.aggregate([
+{
+$unwind: "$reviews"
+},
+{
+$group: {
+_id: "$name",
+totalReviews: { $sum: 1 },
+averageRating: { $avg: "$reviews.rating" },
+comments: { $push: "$reviews.comment" }
+}
+},
+{
+$project: {
+_id: 0,
+product: "$_id",
+totalReviews: 1,
+averageRating: 1,
+comments: 1
+}
+}
+]).pretty( )
+
+===================================================================================================
+
+8.part a
+
+db.employees.insertMany([
+{ name: "Alice", email: "alice@example.com", dept: "HR", skills: ["communication", "leadership"]
+},
+{ name: "Bob", email: "bob@example.com", dept: "Engineering", skills: ["JavaScript", "MongoDB"]
+},
+{ name: "Charlie", dept: "HR", skills: ["recruitment"] },
+{ name: "David", email: "david@example.com", dept: "Engineering" },
+{ name: "Eve", email: "eve@example.com", dept: "Finance", skills: ["accounting", "Excel"] }])
+
+db.employees.createIndex({ email: 1 }, { unique: true })
+
+db.employees.createIndex({ email: 1 }, { sparse: true })
+
+db.employees.createIndex({ dept: 1, name: 1 })
+
+db.employees.createIndex({ skills: 1 })
+
+db.employees.getIndexes( )
+
+==================================================================================================
+
+8.part b
+
+db.products.insertMany([
+{ name: "Laptop", category: "Electronics", price: 1000, stock: 10 },
+{ name: "Smartphone", category: "Electronics", price: 500, stock: 50 },
+{ name: "Desk Chair", category: "Furniture", price: 150, stock: 5 },
+{ name: "Notebook", category: "Stationery", price: 5, stock: 100 },
+{ name: "Monitor", category: "Electronics", price: 200, stock: 20 }
+])
+
+db.products.find({ category: "Electronics", price: { $lt: 600 } }).explain("executionStats")
+
+db.products.createIndex({ category: 1, price: 1 })
+
+db.products.find({ category: "Electronics", price: { $lt: 600 } }).explain("executionStats").executionStats. totalDocsExamined
+
+=====================================================================================================
+
+9.part a
+
+use kannadaMovies
+db.createCollection(‘catalog’)
+
+db.catalog.countDocuments( )
+
+db.catalog.createIndex({name: "text", genre: "text"})
+
+db.catalog.find({$text: {$search: "maga"}})
+db.catalog.find({$text: {$search: "comedy"}})
+
+====================================================================================================
+
+9.part b
+
+db.catalog.find({ $text: { $search: "crime romance -action" }, year:2021 } )
+
+=====================================================================================================
+
+10
+
+result = db.catalog.aggregate([
+{$match: {year :2017}}, // 1. Match stage: Filter documents by year 2017
+{$group: {_id: "$genre", avgRating:{$avg: "$rating"}}}, // 2. Group stage: Group by genre and
+calculate average rating
+{$sort: {avgRating:-1}}, // 3. Sort stage: Sort by avgRating in descending order
+{$project: {year:"$year", avgRating:1, genre:1} }, // 4. Project stage: Include specific fields
+{$limit:5} ]).toArray() // 5. Limit stage: Limit the output to 5 results
+print("Top 5 rated movie genres with their average rating")
+printjson(result)
+
+====================================================================================================
