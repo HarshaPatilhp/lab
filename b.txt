@@ -1,5 +1,6 @@
-1.
-water jug:
+===========================================================================================================================================================================
+
+																			i) PROGRAM-01 (water jug)
 
 def water_jug(jug1,jug2,target):
     stack=[(0,0,"Start")]
@@ -34,62 +35,72 @@ def water_jug(jug1,jug2,target):
 
 water_jug(3,5,4)
 
-====================================================================================================
-2.
-missionaries and cannibals:
+
+============================================================================================================================================================================
+
+																		ii) program-02 (missionaries & cannibels)
 
 from collections import deque
 
 def is_valid(state):
-    m_left, c_left, boat, m_right, c_right = state
-    if m_left < 0 or c_left < 0 or m_right < 0 or c_right < 0:
+    m_left,c_left,boat,m_right,c_right = state
+
+    if(m_left<0 or c_left<0 or m_right<0 or c_right<0):
         return False
-    if (m_left > 0 and m_left < c_left) or (m_right > 0 and m_right < c_right):
+    if(m_left>0 and m_left<c_left) or (m_right>0 and m_right<c_right):
         return False
+    
     return True
 
-def successors(state):
-    moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]
-    m_left, c_left, boat, m_right, c_right = state
-    next_states = []
-    for m, c in moves:
-        if boat == 1:
-            new_state = (m_left - m, c_left - c, 0, m_right + m, c_right + c)
+def succesors(state):
+    moves=[(1,0),(2,0),(0,1),(0,2),(1,1)]
+    m_left,c_left,boat,m_right,c_right = state
+    next_states=[]
+
+    for m,c in moves:
+        if boat==1:
+            new_state = (m_left-m, c_left -c,0,m_right+m,c_right+c)
         else:
-            new_state = (m_left + m, c_left + c, 1, m_right - m, c_right - c)
+            new_state = (m_left+m,c_left+c,1,m_right-m,c_right-c)
+        
         if is_valid(new_state):
             next_states.append(new_state)
+    
     return next_states
 
-def bfs(start, goal):
-    queue = deque([(start, [start])])
+def bfs(start,goal):
+    queue = deque([(start,[start])])
     visited = set()
+
     while queue:
-        state, path = queue.popleft()
+        state,path = queue.popleft()
         if state == goal:
             return path
         visited.add(state)
-        for next_state in successors(state):
+        for next_state in succesors(state):
             if next_state not in visited:
-                queue.append((next_state, path + [next_state]))
+                queue.append((next_state,path+[next_state]))
+
     return None
 
 def solve():
     start = (3, 3, 1, 0, 0)
     goal = (0, 0, 0, 3, 3)
-    solution = bfs(start, goal)
+    solution =bfs(start,goal)
     if solution:
         for step in solution:
             print(step)
     else:
-        print("No solution found.")
+
+        print("No solution found")
 
 solve()
 
+==========================================================================================================================================================================
 
-======================================================================================================
-3.(a)
-a* search:
+																				PROGRAM-03 (A* & AO*)
+
+a) A*
 
 from queue import PriorityQueue
 
@@ -124,9 +135,9 @@ heuristics_a = {'A': 3, 'B': 1, 'C': 2, 'D': 0}
 
 print("A* Cost from A to D:", a_star('A', 'D', graph_a, heuristics_a))
 
-=================================================================
-3.(b)
-ao* search:
+========================================================
+
+b) AO*
 
 def ao_star(node, graph, h):
     if not graph[node]: # If node is terminal, return its heuristic
@@ -154,117 +165,84 @@ heuristics_ao = {'A': 999, 'B': 1, 'C': 2, 'D': 4}
 
 print("AO* Final Cost from A:", ao_star('A', graph_ao, heuristics_ao))
 
-==================================================================================================
-4.
-8 queens:
+===========================================================================================================================================================================
 
-def is_safe(board, row, col, n):
-    # Check column
-    for i in range(row):
-        if board[i][col] == 1:
-            return False
-    
-    # Check upper-left diagonal
-    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
-        if board[i][j] == 1:
-            return False
-    
-    # Check upper-right diagonal
-    for i, j in zip(range(row-1, -1, -1), range(col+1, n)):
-        if board[i][j] == 1:
-            return False
-    
-    return True
+																						PROGRAM - 04 (8 queens)
 
-def solve_n_queens(board, row, n, solutions):
-    if row == n:
-        # Found a solution, add to solutions list
-        solution = []
-        for i in range(n):
-            row_str = ''
-            for j in range(n):
-                row_str += 'Q' if board[i][j] == 1 else '.'
-            solution.append(row_str)
-        solutions.append(solution)
-        return
-    
-    for col in range(n):
-        if is_safe(board, row, col, n):
-            board[row][col] = 1
-            solve_n_queens(board, row + 1, n, solutions)
-            board[row][col] = 0
 
-def eight_queens():
-    n = 8
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    solutions = []
-    solve_n_queens(board, 0, n, solutions)
-    
-    # Print all solutions
-    for idx, solution in enumerate(solutions, 1):
-        print(f"Solution {idx}:")
-        for row in solution:
-            print(row)
-        print()
+N = int(input("ENTER THE NUMBER OF QUEENS: "))
 
-if _name_ == "_main_":
-    eight_queens()
+board = [[0] * N for _ in range(N)]
 
-=====================================================================================================
-5.
-TSP:
+def attack(i, j):
 
-def nearest_neighbor_tsp(graph, start):
-    n = len(graph)
-    visited = [False] * n
-    tour = [start]
-    total_cost = 0
-    visited[start] = True
+    for k in range(0, N):
+        if board[i][k] == 1 or board[k][j] == 1:
+            return True
+
+    for k in range(0, N):
+        for l in range(0, N):
+            if (k + l == i + j) or (k - l == i - j):
+                if board[k][l] == 1:
+                    return True
+    return False
+
+def N_queens(n):
+    if n == 0:
+        return True
+    for i in range(0, N):
+        for j in range(0, N):
+            if (not attack(i, j)) and (board[i][j] != 1):
+                board[i][j] = 1
+                if N_queens(n - 1) == True:
+                    return True
+                board[i][j] = 0
+    return False
+
+N_queens(N)
+
+for i in board:
+    print(" ".join('Q' if x == 1 else '.' for x in i))
+
+
+===========================================================================================================================================================================
+
+																						PROGRAM - 05 (tsp)
+
+def travel(graph, start):
+
+    unvisited = [i for i in range(len(graph))]
+    unvisited.remove(start)
     current = start
+    path = [start]
+    total_cost=0
+
+    while unvisited:
+        cost,closest = min([(graph[current][j], j) for j in unvisited])
+        total_cost +=cost
+        current = closest
+        path.append(current)
+        unvisited.remove(current)
     
-    # Continue until all cities are visited
-    while len(tour) < n:
-        min_distance = float('inf')
-        next_city = -1
-        
-        # Find the nearest unvisited city
-        for i in range(n):
-            if not visited[i] and graph[current][i] < min_distance:
-                min_distance = graph[current][i]
-                next_city = i
-        
-        # Move to the nearest city
-        tour.append(next_city)
-        total_cost += min_distance
-        visited[next_city] = True
-        current = next_city
-    
-    # Return to the starting city
     total_cost += graph[current][start]
-    tour.append(start)
-    
-    return tour, total_cost
+    path.append(start)
 
-def main():
-    # Example graph: adjacency matrix representing distances between cities
-    graph = [
-        [0, 10, 15, 20],
-        [10, 0, 35, 25],
-        [15, 35, 0, 30],
-        [20, 25, 30, 0]
-    ]
-    
-    start_city = 0  # Start from city 0
-    tour, cost = nearest_neighbor_tsp(graph, start_city)
-    
-    print("Tour:", " -> ".join(str(i + 1) for i in tour))
-    print("Total Cost:", cost)
+    return path,total_cost
 
-if _name_ == "_main_":
-    main()
+graph = [[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]
+
+start = 0
+
+path,total_cost = travel(graph, start)
+
+print("The travelling salesman path is:",path)
+print("the cost of the path is:",total_cost)
 
 
-=====================================================================================================
+===========================================================================================================================================================================
+
+																						PROGRAM-06 (forward-backward)
+
 6.
 from collections import deque
 
@@ -291,45 +269,54 @@ facts = [
 result = forward_chain(['snake'], facts)
 print(result)
 
-====================================================================================================
-7.
-FOPL related problems:
+
+==========================================================================================================================================================================
+
+																						PROGRAM-07 (FOPL)
 
 import re
-def dnf(formula):
-    if re.fullmatch(r'[A-Z]|~[A-Z]|()""', formula): return formula
-    if 'and' in formula or 'or' in formula:
-        parts = re.split(r'(?<=[^\w])or(?=[^\w])|(?<=[^\w])and(?=[^\w])',formula)
-        print(f"parts: {parts}")
-        dnf_parts = [dnf(part) for part in parts] 
-        print(f"dnf_parts: {dnf_parts}")
-        if 'or' in formula:
-            return " or ".join(parts) 
-        elif 'and' in formula:
-            return " and ".join(parts)
 
+def dnf(formula):
+    formula = formula.strip().strip("()")
+    if re.fullmatch(r'[A-Z]|~[A-Z]', formula):
+        return formula
+
+    if 'and' in formula or 'or' in formula:
+        parts = re.split(r'\sor\s|\sand\s', formula)
+        print(f"parts: {parts}")
+        dnf_parts = [dnf(part.strip()) for part in parts]
+        print(f"dnf_parts: {dnf_parts}")
+        
+        if 'or' in formula:
+            return " or ".join(dnf_parts)
+        elif 'and' in formula:
+            return " and ".join(dnf_parts)
 
 def cnf(formula):
-    if re.fullmatch(r'[A-Z]|~[A-Z]', formula): return formula
-
+    formula = formula.strip().strip("()")
+    if re.fullmatch(r'[A-Z]|~[A-Z]', formula):
+        return formula
+    
     if 'and' in formula or 'or' in formula:
-        parts = re.split(r'(?<=\()or(?=\))|(?<=\()and(?=\))', formula)
+        parts = re.split(r'\sor\s|\sand\s', formula)
+        cnf_parts = [cnf(part.strip()) for part in parts]
         if 'and' in formula:
-            return " and ".join(parts)
+            return " and ".join(cnf_parts)
         elif 'or' in formula:
-            return " or ".join(parts)
+            return " or ".join(cnf_parts)
 
+# Example usage
 formula = "(A and B) or C or D"
 cnf_formula = cnf(formula)
 dnf_formula = dnf(formula)
-print(cnf_formula)
-print("Hello")
-print(dnf_formula)
 
-===================================================================================================
-8.
-game:
+print("\nFinal CNF:", cnf_formula)
+print("Final DNF:", dnf_formula)
 
+
+===========================================================================================================================================================================
+
+																						PROGRAM-08
 
 import random 
 
@@ -350,6 +337,6 @@ while True :
         print("Too high. Try again.")
     else : 
         print("You guessing it again")
-        break
+        break
 
-
+===========================================================================================================================================================================
