@@ -330,4 +330,24 @@ print(dnf_formula)
 8.
 game:
 
-Gaurav bro paste your number game here
+
+import random 
+
+secret = random.randint(1,10)
+print("Welcome to the Number Guessing Game ")
+print("I am thinking of a number between 1 and 10")
+
+while True : 
+    guess = input("Enter a no : ")
+    if not guess.isdigit():
+        print("Please Guess a no")
+        continue
+    guess=int(guess)
+
+    if guess<secret:
+        print("Too low. Try again.")
+    elif guess>secret:
+        print("Too high. Try again.")
+    else : 
+        print("You guessing it again")
+        break
