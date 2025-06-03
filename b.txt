@@ -41,37 +41,23 @@ water_jug(3,5,4)
 
 from collections import deque
 
-from collections import deque
-
-def is_valid(s):
-    ml, cl, _, mr, cr = s
-    return all(x >= 0 for x in s) and (ml == 0 or ml >= cl) and (mr == 0 or mr >= cr)
-
-def successors(s):
-    ml, cl, b, mr, cr = s
-    moves = [(1,0),(2,0),(0,1),(0,2),(1,1)]
-    next_s = []
-    for m, c in moves:
-        if b: ns = (ml - m, cl - c, 0, mr + m, cr + c)
-        else: ns = (ml + m, cl + c, 1, mr - m, cr - c)
-        if is_valid(ns): next_s.append(ns)
-    return next_s
-
-def bfs(start, goal):
-    q, v = deque([(start, [start])]), set()
-    while q:
-        s, p = q.popleft()
-        if s == goal: return p
-        v.add(s)
-        for n in successors(s):
-            if n not in v: q.append((n, p + [n]))
-    return None
+def bfs(s, g):
+    V, Q = set(), deque([(s, [s])])
+    while Q:
+        x, p = Q.popleft()
+        if x == g: return p
+        if x in V: continue
+        V.add(x)
+        for m, c in [(1,0),(2,0),(0,1),(0,2),(1,1)]:
+            ml, cl, b, mr, cr = x
+            d = -1 if b else 1
+            n = (ml + d*m, cl + d*c, 1 - b, mr - d*m, cr - d*c)
+            if min(n[:5]) >= 0 and (n[0] in [0,3] or n[0] >= n[1]) and (n[3] in [0,3] or n[3] >= n[4]):
+                Q.append((n, p + [n]))
 
 def solve():
-    path = bfs((3,3,1,0,0), (0,0,0,3,3))
-    if path:
-        for step in path: print(step)
-    else: print("No solution")
+    R = bfs((3,3,1,0,0), (0,0,0,3,3))
+    print(*R if R else ["No solution"], sep="\n")
 
 solve()
 
