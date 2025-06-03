@@ -1,38 +1,21 @@
 ===========================================================================================================================================================================
 
 						i) PROGRAM-01 (water jug)
-def water_jug(jug1,jug2,target):
-    stack=[(0,0,"Start")]
-    visited=set()
+def water_jug(j1, j2, t):
+    s, v = [(0, 0)], set()
+    while s:
+        a, b = s.pop()
+        print(f"{a} {b}")
+        if a == t or b == t: return print(f"Solved: {a} {b}")
+        if (a, b) in v: continue
+        v.add((a, b))
+        m = [(j1,b),(a,j2),(0,b),(a,0),
+             (a - min(a,j2-b), b + min(a,j2-b)),
+             (a + min(b,j1-a), b - min(b,j1-a))]
+        s += [x for x in m if x not in v]
+    print("No solution")
 
-    while stack:
-        a,b,action=stack.pop()
-
-        print(f"Action : {action} -> Jug1 : {a}L, Jug2 : {b}L")
-
-        if a==target or b==target:
-            print(f"Solution found : ({a},{b})")
-            return True
-    
-        if (a,b) in visited:
-            continue
-
-        visited.add((a,b))
-        
-        next_status=[(jug1,b,"Filled Jug1") if (jug1,b) not in visited else None,
-                     (a,jug2,"Filled Jug2") if (a,jug2) not in visited else None,
-                     (0,b,"Emptied Jug1") if (0,b) not in visited else None,
-                     (a,0,"Emptied Jug2") if (a,0) not in visited else None,
-                     (a-min(a,jug2-b),b+min(a,jug2-b),"Poured Jug1 -> Jug2") if (a-min(a,jug2-b),b+min(a,jug2-b)) not in visited else None,
-                     (a+min(b,jug1-a),b-min(b,jug1-a),"Poured Jug1 -> Jug2") if (a+min(b,jug1-a),b-min(b,jug1-a)) not in visited else None                          
-                    ]
-        
-        stack.extend(filter(None,next_status))
-
-    print("No soultion found")
-    return False
-
-water_jug(3,5,4)
+water_jug(3, 5, 4)
 
 
 ============================================================================================================================================================================
