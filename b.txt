@@ -1,3 +1,4 @@
+1.
 water jug:
 
 def water_jug(jug1,jug2,target):
@@ -34,7 +35,7 @@ def water_jug(jug1,jug2,target):
 water_jug(3,5,4)
 
 ====================================================================================================
-
+2.
 missionaries and cannibals:
 
 from collections import deque
@@ -87,7 +88,7 @@ solve()
 
 
 ======================================================================================================
-
+3.(a)
 a* search:
 
 from queue import PriorityQueue
@@ -124,7 +125,7 @@ heuristics_a = {'A': 3, 'B': 1, 'C': 2, 'D': 0}
 print("A* Cost from A to D:", a_star('A', 'D', graph_a, heuristics_a))
 
 =================================================================
-
+3.(b)
 ao* search:
 
 def ao_star(node, graph, h):
@@ -154,7 +155,7 @@ heuristics_ao = {'A': 999, 'B': 1, 'C': 2, 'D': 4}
 print("AO* Final Cost from A:", ao_star('A', graph_ao, heuristics_ao))
 
 ==================================================================================================
-
+4.
 8 queens:
 
 def is_safe(board, row, col, n):
@@ -210,7 +211,7 @@ if _name_ == "_main_":
     eight_queens()
 
 =====================================================================================================
-
+5.
 TSP:
 
 def nearest_neighbor_tsp(graph, start):
@@ -264,7 +265,7 @@ if _name_ == "_main_":
 
 
 =====================================================================================================
-
+6.
 forward chaining:
 
 facts = [
@@ -301,7 +302,7 @@ result = forward_chain(['snake'], facts)
 print(result)
 
 ====================================================================================================
-
+7.
 FOPL related problems:
 
 import re
@@ -336,7 +337,7 @@ print("Hello")
 print(dnf_formula)
 
 ===================================================================================================
-
+8.
 game:
 
 Gaurav bro paste your number game here
