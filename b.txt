@@ -1,0 +1,342 @@
+water jug:
+
+def water_jug(jug1,jug2,target):
+    stack=[(0,0,"Start")]
+    visited=set()
+
+    while stack:
+        a,b,action=stack.pop()
+
+        print(f"Action : {action} -> Jug1 : {a}L, Jug2 : {b}L")
+
+        if a==target or b==target:
+            print(f"Solution found : ({a},{b})")
+            return True
+    
+        if (a,b) in visited:
+            continue
+
+        visited.add((a,b))
+        
+        next_status=[(jug1,b,"Filled Jug1") if (jug1,b) not in visited else None,
+                     (a,jug2,"Filled Jug2") if (a,jug2) not in visited else None,
+                     (0,b,"Emptied Jug1") if (0,b) not in visited else None,
+                     (a,0,"Emptied Jug2") if (a,0) not in visited else None,
+                     (a-min(a,jug2-b),b+min(a,jug2-b),"Poured Jug1 -> Jug2") if (a-min(a,jug2-b),b+min(a,jug2-b)) not in visited else None,
+                     (a+min(b,jug1-a),b-min(b,jug1-a),"Poured Jug1 -> Jug2") if (a+min(b,jug1-a),b-min(b,jug1-a)) not in visited else None                          
+                    ]
+        
+        stack.extend(filter(None,next_status))
+
+    print("No soultion found")
+    return False
+
+water_jug(3,5,4)
+
+====================================================================================================
+
+missionaries and cannibals:
+
+from collections import deque
+
+def is_valid(state):
+    m_left, c_left, boat, m_right, c_right = state
+    if m_left < 0 or c_left < 0 or m_right < 0 or c_right < 0:
+        return False
+    if (m_left > 0 and m_left < c_left) or (m_right > 0 and m_right < c_right):
+        return False
+    return True
+
+def successors(state):
+    moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]
+    m_left, c_left, boat, m_right, c_right = state
+    next_states = []
+    for m, c in moves:
+        if boat == 1:
+            new_state = (m_left - m, c_left - c, 0, m_right + m, c_right + c)
+        else:
+            new_state = (m_left + m, c_left + c, 1, m_right - m, c_right - c)
+        if is_valid(new_state):
+            next_states.append(new_state)
+    return next_states
+
+def bfs(start, goal):
+    queue = deque([(start, [start])])
+    visited = set()
+    while queue:
+        state, path = queue.popleft()
+        if state == goal:
+            return path
+        visited.add(state)
+        for next_state in successors(state):
+            if next_state not in visited:
+                queue.append((next_state, path + [next_state]))
+    return None
+
+def solve():
+    start = (3, 3, 1, 0, 0)
+    goal = (0, 0, 0, 3, 3)
+    solution = bfs(start, goal)
+    if solution:
+        for step in solution:
+            print(step)
+    else:
+        print("No solution found.")
+
+solve()
+
+
+======================================================================================================
+
+a* search:
+
+from queue import PriorityQueue
+
+def a_star(start, goal, graph, h):
+    open_list = PriorityQueue()
+    open_list.put((h[start], 0, start))
+    came_from = {}
+    visited = set()
+
+    while not open_list.empty():
+        f, g, node = open_list.get()
+
+        if node == goal:
+            print(f"A* path reached goal {goal} with cost {g}")
+            return g
+
+        visited.add(node)
+
+        for neighbor, cost in graph[node]:
+            if neighbor not in visited:
+                g_new = g + cost
+                f_new = g_new + h[neighbor]
+                open_list.put((f_new, g_new, neighbor))
+                came_from[neighbor] = node
+
+# Graph: A → B, C, D (OR paths)
+graph_a = {
+    'A': [('B', 1), ('C', 2), ('D', 4)],
+    'B': [], 'C': [], 'D': []
+}
+heuristics_a = {'A': 3, 'B': 1, 'C': 2, 'D': 0}
+
+print("A* Cost from A to D:", a_star('A', 'D', graph_a, heuristics_a))
+
+=================================================================
+
+ao* search:
+
+def ao_star(node, graph, h):
+    if not graph[node]: # If node is terminal, return its heuristic
+        return h[node]
+
+    min_cost = float('inf') # Start with high cost
+    best_path = None
+
+    for path in graph[node]: # path is a group like ['B', 'C'] or ['D']
+        cost = sum(h[n] for n in path)
+        if cost < min_cost:
+            min_cost = cost
+            best_path = path
+
+    h[node] = min_cost # Update heuristic for current node
+    print(f"AO* best path from {node}: {best_path} with cost {min_cost}")
+    return h[node]
+
+# Graph: A → [B AND C] or [D]
+graph_ao = {
+    'A': [['B', 'C'], ['D']],
+    'B': [], 'C': [], 'D': []
+}
+heuristics_ao = {'A': 999, 'B': 1, 'C': 2, 'D': 4}
+
+print("AO* Final Cost from A:", ao_star('A', graph_ao, heuristics_ao))
+
+==================================================================================================
+
+8 queens:
+
+def is_safe(board, row, col, n):
+    # Check column
+    for i in range(row):
+        if board[i][col] == 1:
+            return False
+    
+    # Check upper-left diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
+        if board[i][j] == 1:
+            return False
+    
+    # Check upper-right diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col+1, n)):
+        if board[i][j] == 1:
+            return False
+    
+    return True
+
+def solve_n_queens(board, row, n, solutions):
+    if row == n:
+        # Found a solution, add to solutions list
+        solution = []
+        for i in range(n):
+            row_str = ''
+            for j in range(n):
+                row_str += 'Q' if board[i][j] == 1 else '.'
+            solution.append(row_str)
+        solutions.append(solution)
+        return
+    
+    for col in range(n):
+        if is_safe(board, row, col, n):
+            board[row][col] = 1
+            solve_n_queens(board, row + 1, n, solutions)
+            board[row][col] = 0
+
+def eight_queens():
+    n = 8
+    board = [[0 for _ in range(n)] for _ in range(n)]
+    solutions = []
+    solve_n_queens(board, 0, n, solutions)
+    
+    # Print all solutions
+    for idx, solution in enumerate(solutions, 1):
+        print(f"Solution {idx}:")
+        for row in solution:
+            print(row)
+        print()
+
+if _name_ == "_main_":
+    eight_queens()
+
+=====================================================================================================
+
+TSP:
+
+def nearest_neighbor_tsp(graph, start):
+    n = len(graph)
+    visited = [False] * n
+    tour = [start]
+    total_cost = 0
+    visited[start] = True
+    current = start
+    
+    # Continue until all cities are visited
+    while len(tour) < n:
+        min_distance = float('inf')
+        next_city = -1
+        
+        # Find the nearest unvisited city
+        for i in range(n):
+            if not visited[i] and graph[current][i] < min_distance:
+                min_distance = graph[current][i]
+                next_city = i
+        
+        # Move to the nearest city
+        tour.append(next_city)
+        total_cost += min_distance
+        visited[next_city] = True
+        current = next_city
+    
+    # Return to the starting city
+    total_cost += graph[current][start]
+    tour.append(start)
+    
+    return tour, total_cost
+
+def main():
+    # Example graph: adjacency matrix representing distances between cities
+    graph = [
+        [0, 10, 15, 20],
+        [10, 0, 35, 25],
+        [15, 35, 0, 30],
+        [20, 25, 30, 0]
+    ]
+    
+    start_city = 0  # Start from city 0
+    tour, cost = nearest_neighbor_tsp(graph, start_city)
+    
+    print("Tour:", " -> ".join(str(i + 1) for i in tour))
+    print("Total Cost:", cost)
+
+if _name_ == "_main_":
+    main()
+
+
+=====================================================================================================
+
+forward chaining:
+
+facts = [
+    ['barks', 'dog'],
+    ['dog', 'mammal'],
+    ['mammal', 'animal'],
+    ['animal', 'livingthing'],
+    ['meows', 'cat'],
+    ['cat', 'mammal'],
+    ['lays_eggs', 'bird'],
+    ['bird', 'animal'],
+    ['snake', 'reptile'],
+    ['reptile', 'animal']
+]
+
+def forward_chain(start_terms, fact_base):
+    from collections import deque
+
+    discovered = set(start_terms)
+    queue = deque(start_terms)
+    inferred = []
+
+    while queue:
+        current = queue.popleft()
+        for cause, effect in fact_base:
+            if cause == current and effect not in discovered:
+                inferred.append([cause, effect])
+                discovered.add(effect)
+                queue.append(effect)
+    return inferred
+
+# Example usage
+result = forward_chain(['snake'], facts)
+print(result)
+
+====================================================================================================
+
+FOPL related problems:
+
+import re
+def dnf(formula):
+    if re.fullmatch(r'[A-Z]|~[A-Z]|()""', formula): return formula
+    if 'and' in formula or 'or' in formula:
+        parts = re.split(r'(?<=[^\w])or(?=[^\w])|(?<=[^\w])and(?=[^\w])',formula)
+        print(f"parts: {parts}")
+        dnf_parts = [dnf(part) for part in parts] 
+        print(f"dnf_parts: {dnf_parts}")
+        if 'or' in formula:
+            return " or ".join(parts) 
+        elif 'and' in formula:
+            return " and ".join(parts)
+
+
+def cnf(formula):
+    if re.fullmatch(r'[A-Z]|~[A-Z]', formula): return formula
+
+    if 'and' in formula or 'or' in formula:
+        parts = re.split(r'(?<=\()or(?=\))|(?<=\()and(?=\))', formula)
+        if 'and' in formula:
+            return " and ".join(parts)
+        elif 'or' in formula:
+            return " or ".join(parts)
+
+formula = "(A and B) or C or D"
+cnf_formula = cnf(formula)
+dnf_formula = dnf(formula)
+print(cnf_formula)
+print("Hello")
+print(dnf_formula)
+
+===================================================================================================
+
+game:
+
+Gaurav bro paste your number game here
