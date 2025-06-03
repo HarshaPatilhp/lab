@@ -49,70 +49,41 @@ solve()
 
 																				PROGRAM-03 (A* & AO*)
 
-a) A*
-
 from queue import PriorityQueue
 
-def a_star(start, goal, graph, h):
-    open_list = PriorityQueue()
-    open_list.put((h[start], 0, start))
-    came_from = {}
-    visited = set()
+def a_star(s, g, G, h):
+    Q, V = PriorityQueue(), set()
+    Q.put((h[s], 0, s))
+    while not Q.empty():
+        f, g_c, n = Q.get()
+        if n == g: return g_c
+        V.add(n)
+        for nei, c in G[n]:
+            if nei not in V:
+                g_n = g_c + c
+                Q.put((g_n + h[nei], g_n, nei))
 
-    while not open_list.empty():
-        f, g, node = open_list.get()
+G1 = {'A': [('B', 1), ('C', 2), ('D', 4)], 'B': [], 'C': [], 'D': []}
+H1 = {'A': 3, 'B': 1, 'C': 2, 'D': 0}
 
-        if node == goal:
-            print(f"A* path reached goal {goal} with cost {g}")
-            return g
+print("A* Cost:", a_star('A', 'D', G1, H1))
 
-        visited.add(node)
-
-        for neighbor, cost in graph[node]:
-            if neighbor not in visited:
-                g_new = g + cost
-                f_new = g_new + h[neighbor]
-                open_list.put((f_new, g_new, neighbor))
-                came_from[neighbor] = node
-
-# Graph: A → B, C, D (OR paths)
-graph_a = {
-    'A': [('B', 1), ('C', 2), ('D', 4)],
-    'B': [], 'C': [], 'D': []
-}
-heuristics_a = {'A': 3, 'B': 1, 'C': 2, 'D': 0}
-
-print("A* Cost from A to D:", a_star('A', 'D', graph_a, heuristics_a))
 
 ========================================================
 
 b) AO*
 
-def ao_star(node, graph, h):
-    if not graph[node]: # If node is terminal, return its heuristic
-        return h[node]
+def ao_star(n, G, h):
+    if not G[n]: return h[n]
+    h[n], p = min((sum(h[x] for x in path), path) for path in G[n])
+    print(f"{n} -> {p}, Cost: {h[n]}")
+    return h[n]
 
-    min_cost = float('inf') # Start with high cost
-    best_path = None
+G2 = {'A': [['B', 'C'], ['D']], 'B': [], 'C': [], 'D': []}
+H2 = {'A': 999, 'B': 1, 'C': 2, 'D': 4}
 
-    for path in graph[node]: # path is a group like ['B', 'C'] or ['D']
-        cost = sum(h[n] for n in path)
-        if cost < min_cost:
-            min_cost = cost
-            best_path = path
+print("AO* Cost:", ao_star('A', G2, H2))
 
-    h[node] = min_cost # Update heuristic for current node
-    print(f"AO* best path from {node}: {best_path} with cost {min_cost}")
-    return h[node]
-
-# Graph: A → [B AND C] or [D]
-graph_ao = {
-    'A': [['B', 'C'], ['D']],
-    'B': [], 'C': [], 'D': []
-}
-heuristics_ao = {'A': 999, 'B': 1, 'C': 2, 'D': 4}
-
-print("AO* Final Cost from A:", ao_star('A', graph_ao, heuristics_ao))
 
 ===========================================================================================================================================================================
 
