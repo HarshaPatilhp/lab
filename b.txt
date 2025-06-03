@@ -266,38 +266,28 @@ if _name_ == "_main_":
 
 =====================================================================================================
 6.
-forward chaining:
+from collections import deque
 
+def forward_chain(start, facts):
+    seen, q, out = set(start), deque(start), []
+    while q:
+        c = q.popleft()
+        for a, b in facts:
+            if a == c and b not in seen:
+                out.append([a, b])
+                seen.add(b)
+                q.append(b)
+    return out
+
+# Example fact base (cause-effect pairs)
 facts = [
-    ['barks', 'dog'],
-    ['dog', 'mammal'],
-    ['mammal', 'animal'],
-    ['animal', 'livingthing'],
-    ['meows', 'cat'],
-    ['cat', 'mammal'],
-    ['lays_eggs', 'bird'],
-    ['bird', 'animal'],
-    ['snake', 'reptile'],
-    ['reptile', 'animal']
+    ('snake', 'reptile'),
+    ('reptile', 'animal'),
+    ('animal', 'living'),
+    ('cat', 'animal'),
+    ('apple', 'fruit')
 ]
 
-def forward_chain(start_terms, fact_base):
-    from collections import deque
-
-    discovered = set(start_terms)
-    queue = deque(start_terms)
-    inferred = []
-
-    while queue:
-        current = queue.popleft()
-        for cause, effect in fact_base:
-            if cause == current and effect not in discovered:
-                inferred.append([cause, effect])
-                discovered.add(effect)
-                queue.append(effect)
-    return inferred
-
-# Example usage
 result = forward_chain(['snake'], facts)
 print(result)
 
