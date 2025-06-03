@@ -1,7 +1,6 @@
 ===========================================================================================================================================================================
 
-																			i) PROGRAM-01 (water jug)
-
+							i) PROGRAM-01 (water jug)
 def water_jug(jug1,jug2,target):
     stack=[(0,0,"Start")]
     visited=set()
@@ -38,63 +37,44 @@ water_jug(3,5,4)
 
 ============================================================================================================================================================================
 
-																		ii) program-02 (missionaries & cannibels)
+								ii) program-02 (missionaries & cannibels)
 
 from collections import deque
 
-def is_valid(state):
-    m_left,c_left,boat,m_right,c_right = state
+from collections import deque
 
-    if(m_left<0 or c_left<0 or m_right<0 or c_right<0):
-        return False
-    if(m_left>0 and m_left<c_left) or (m_right>0 and m_right<c_right):
-        return False
-    
-    return True
+def is_valid(s):
+    ml, cl, _, mr, cr = s
+    return all(x >= 0 for x in s) and (ml == 0 or ml >= cl) and (mr == 0 or mr >= cr)
 
-def succesors(state):
-    moves=[(1,0),(2,0),(0,1),(0,2),(1,1)]
-    m_left,c_left,boat,m_right,c_right = state
-    next_states=[]
+def successors(s):
+    ml, cl, b, mr, cr = s
+    moves = [(1,0),(2,0),(0,1),(0,2),(1,1)]
+    next_s = []
+    for m, c in moves:
+        if b: ns = (ml - m, cl - c, 0, mr + m, cr + c)
+        else: ns = (ml + m, cl + c, 1, mr - m, cr - c)
+        if is_valid(ns): next_s.append(ns)
+    return next_s
 
-    for m,c in moves:
-        if boat==1:
-            new_state = (m_left-m, c_left -c,0,m_right+m,c_right+c)
-        else:
-            new_state = (m_left+m,c_left+c,1,m_right-m,c_right-c)
-        
-        if is_valid(new_state):
-            next_states.append(new_state)
-    
-    return next_states
-
-def bfs(start,goal):
-    queue = deque([(start,[start])])
-    visited = set()
-
-    while queue:
-        state,path = queue.popleft()
-        if state == goal:
-            return path
-        visited.add(state)
-        for next_state in succesors(state):
-            if next_state not in visited:
-                queue.append((next_state,path+[next_state]))
-
+def bfs(start, goal):
+    q, v = deque([(start, [start])]), set()
+    while q:
+        s, p = q.popleft()
+        if s == goal: return p
+        v.add(s)
+        for n in successors(s):
+            if n not in v: q.append((n, p + [n]))
     return None
 
 def solve():
-    start = (3, 3, 1, 0, 0)
-    goal = (0, 0, 0, 3, 3)
-    solution =bfs(start,goal)
-    if solution:
-        for step in solution:
-            print(step)
-    else:
-
-        print("No solution found")
+    path = bfs((3,3,1,0,0), (0,0,0,3,3))
+    if path:
+        for step in path: print(step)
+    else: print("No solution")
 
 solve()
+
 
 ==========================================================================================================================================================================
 
