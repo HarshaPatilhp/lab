@@ -1,0 +1,247 @@
+=====================================================================================================================
+                                                PROGRAM 6
+
+#include <stdio.h>
+#include <limits.h>
+#define M 100
+
+int d[M], v[M], g[M][M], n, s;
+
+int mD() {
+    int m = INT_MAX, i, mi = -1;
+    for (i = 0; i < n; i++)
+        if (!v[i] && d[i] < m) m = d[i], mi = i;
+    return mi;
+}
+
+int main() {
+    printf("Vertices: "); scanf("%d", &n);
+    printf("Matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++) scanf("%d", &g[i][j]);
+    printf("Source: "); scanf("%d", &s);
+    for (int i = 0; i < n; i++) d[i] = INT_MAX;
+    d[s] = 0;
+
+    for (int c = 0; c < n - 1; c++) {
+        int u = mD(); v[u] = 1;
+        for (int i = 0; i < n; i++)
+            if (!v[i] && g[u][i] && d[u] + g[u][i] < d[i])
+                d[i] = d[u] + g[u][i];
+    }
+    for (int i = 0; i < n; i++) printf("%d -> %d\n", s, d[i]);
+}
+
+
+=======================================================================================================================================
+                                                            PROGRAM 7
+
+#include <stdio.h>
+#define M 100
+int g[M][M], v[M], s[M], t = -1, n;
+
+void dfs(int x) {
+    v[x] = 1;
+    for (int i = 0; i < n; i++)
+        if (g[x][i] && !v[i]) dfs(i);
+    s[++t] = x;
+}
+
+int main() {
+    printf("Vertices: "); scanf("%d", &n);
+    printf("Adjacency matrix:\n");
+    for (int i = 0; i < n*n; i++) scanf("%d", &g[i/n][i%n]);
+    for (int i = 0; i < n; i++)
+        if (!v[i]) dfs(i);
+    printf("Topological Order:\n");
+    while (t >= 0) printf("%d ", s[t--]);
+}
+
+
+==============================================================================================================================================
+                                                    PROGRAM 8
+
+#include <stdio.h>
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int knapsack(int W, int wt[], int val[], int n) {
+    int i, w;
+    int K[n + 1][W + 1];
+
+    for (i = 0; i <= n; i++) {
+        for (w = 0; w <= W; w++) {
+            if (i == 0 || w == 0)
+                K[i][w] = 0;
+            else if (wt[i - 1] <= w)
+                K[i][w] = max(val[i - 1] + K[i - 1][w - wt[i - 1]], K[i - 1][w]);
+            else
+                K[i][w] = K[i - 1][w];
+        }
+    }
+    return K[n][W];
+}
+
+int main() {
+    int n, W;
+
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    int val[n], wt[n];
+
+    printf("Enter the values of the items:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Value of item %d: ", i + 1);
+        scanf("%d", &val[i]);
+    }
+
+    printf("Enter the weights of the items:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Weight of item %d: ", i + 1);
+        scanf("%d", &wt[i]);
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &W);
+
+    int result = knapsack(W, wt, val, n);
+    printf("Maximum value that can be put in knapsack = %d\n", result);
+
+    return 0;
+}
+
+
+===========================================================================================================================================
+                                                        PROGRAM 9
+
+#include <stdio.h>
+#include <stdbool.h>
+
+void printSubset(int set[], bool subset[][1001], int n, int sum) {
+    int i = n;
+    int s = sum;
+    printf("Subset found: ");
+    while (i > 0 && s > 0) {
+        if (subset[i][s] && !subset[i - 1][s]) {
+            printf("%d ", set[i - 1]);
+            s -= set[i - 1];
+        }
+        i--;
+    }
+    printf("\n");
+}
+
+bool isSubsetSum(int set[], int n, int sum) {
+    bool subset[n + 1][1001];
+
+    for (int i = 0; i <= n; i++)
+        subset[i][0] = true;
+
+    for (int i = 1; i <= sum; i++)
+        subset[0][i] = false;
+
+    for (int i = 1; i <= n; i++) {
+        for (int s = 1; s <= sum; s++) {
+            if (set[i - 1] > s)
+                subset[i][s] = subset[i - 1][s];
+            else
+                subset[i][s] = subset[i - 1][s] || subset[i - 1][s - set[i - 1]];
+        }
+    }
+
+    if (subset[n][sum]) {
+        printSubset(set, subset, n, sum);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int main() {
+    int n, d;
+
+    printf("Enter the number of elements in the set: ");
+    scanf("%d", &n);
+
+    int set[n];
+    printf("Enter the elements of the set:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Element %d: ", i + 1);
+        scanf("%d", &set[i]);
+    }
+
+    printf("Enter the target sum: ");
+    scanf("%d", &d);
+
+    if (!isSubsetSum(set, n, d))
+        printf("No subset with the given sum found.\n");
+
+    return 0;
+}
+
+==============================================================================================================================================
+                                                    PROGRAM 10
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <math.h>
+#include <stdlib.h>
+
+#define MAX 20
+
+int board[MAX];
+
+bool isSafe(int row, int col) {
+    for (int i = 0; i < row; i++) {
+        if (board[i] == col || abs(board[i] - col) == abs(i - row))
+            return false;
+    }
+    return true;
+}
+
+void printSolution(int n) {
+    printf("One of the solutions:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (board[i] == j)
+                printf("Q ");
+            else
+                printf(". ");
+        }
+        printf("\n");
+    }
+}
+
+bool solveNQueens(int row, int n) {
+    if (row == n) {
+        printSolution(n);
+        return true;
+    }
+    for (int col = 0; col < n; col++) {
+        if (isSafe(row, col)) {
+            board[row] = col;
+            if (solveNQueens(row + 1, n))
+                return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    int n;
+    printf("Enter the number of queens (N): ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > MAX) {
+        printf("Please enter N between 1 and %d\n", MAX);
+        return 1;
+    }
+
+    if (!solveNQueens(0, n)) {
+        printf("No solution exists for N = %d\n", n);
+    }
+
+    return 0;
+}
