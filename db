@@ -1,41 +1,51 @@
 																						PROGRAM-01
 
 SHOW DATABASES;
-
-CREATE DATABASE IF NOT EXISTS ai403_test1;
+drop database ai403_test1;
+CREATE DATABASE ai403_test1;
 USE ai403_test1;
 
 CREATE TABLE Employee (
-    EMPNO INT NOT NULL,
-    ENAME VARCHAR(50) NOT NULL,
-    JOB VARCHAR(50) NOT NULL,
+    EMPNO INT,
+    ENAME VARCHAR(50),
+    JOB VARCHAR(50),
     MANAGER_NO INT,
-    SAL DECIMAL(10,2) NOT NULL,
-    COMMISION DECIMAL(10,2),
-    PRIMARY KEY (EMPNO)
+    SAL DECIMAL(10,2),
+    COMMISION DECIMAL(10,2)
 );
 
-DESC Employee;
+desc Employee;
 
 CREATE USER IF NOT EXISTS 'employee_ms'@'localhost' IDENTIFIED BY '24megha!';
 GRANT ALL PRIVILEGES ON ai403_test1.* TO 'employee_ms'@'localhost';
 
+
 START TRANSACTION;
 
-INSERT INTO Employee(EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISION) VALUES
-(1, 'John Doe', 'Manager', NULL, 5000.00, NULL),
-(2, 'Jane Smith', 'Developer', 1, 4000.00, 500.00),
-(3, 'Michael Johnson', 'Analyst', 1, 4500.00, NULL);
+INSERT INTO Employee(EMPNO,ENAME,JOB,MANAGER_NO,SAL,COMMISION) VALUES
+(1,'John Doe','Manager',NULL,5000.00,NULL),
+(2,'Jane Smith','Developer',1,4000.00,500.00),
+(3,'Michael Johnson','Analyst',1,4500.00,NULL);
 
 SELECT * FROM Employee;
 
 ROLLBACK;
 
-INSERT INTO Employee(EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISION) VALUES
-(4, 'Alice Johnson', 'Consultant', NULL, 6000.00, NULL);
+ALTER TABLE Employee
+ADD CONSTRAINT PK_Employee_EMPNO PRIMARY KEY (EMPNO);
 
-DESC Employee;
-SELECT * FROM Employee;
+ALTER TABLE Employee MODIFY EMPNO INT NOT NULL;
+
+ALTER TABLE Employee MODIFY ENAME VARCHAR(50) NOT NULL;
+
+ALTER TABLE Employee MODIFY JOB VARCHAR(50) NOT NULL;
+
+ALTER TABLE Employee MODIFY SAL DECIMAL(10,2) NOT NULL;
+
+desc Employee;
+
+INSERT INTO Employee(EMPNO,ENAME,JOB,SAL) VALUES
+(4,'Alice Johnson',NULL,6000.00);
 
 
 
